@@ -2,8 +2,7 @@
 
 import sys
 import re
-
-import errno
+import argparse
 
 
 def chunks(str, n):
@@ -29,10 +28,14 @@ def colorhex(str):
     sys.stdout.write('\033[0m')
 
 
-def colorize():
-    for l in sys.stdin:
+def hex_chunks(line):
+    return re.finditer('([0-9A-F]{2}){4,}|([0-9a-f]{2}){4,}', line)
+
+
+def colorize(infile, args):
+    for l in infile:
         i = 0
-        for m in re.finditer('([0-9A-F]{2}){4,}|([0-9a-f]{2}){4,}', l):
+        for m in hex_chunks(l):
             frm, to = m.span()
             sys.stdout.write(l[i:frm])
             colorhex(l[frm:to])
@@ -40,28 +43,53 @@ def colorize():
         sys.stdout.write(l[i:])
 
 
-def dump():
-    for l in sys.stdin:
+def find(infile, args):
+    sought = args.find.decode('hex')
+    ndx = infile.read().find(sought)
+    if ndx >= 0:
+        if args.quiet:
+            print args.file
+        else:
+            print '{ndx:<5} {ndx:<5x} {}'.format(args.file, ndx=ndx)
+
+
+def dump(infile, args):
+    for l in infile:
         sys.stdout.write(l.encode('hex'))
     sys.stdout.write('\n')
 
+
+def parse_args():
+    parser = argparse.ArgumentParser(prog='hex')
+    parser.add_argument('--dump', '-d', action='store_true')
+    parser.add_argument('--colorize', '-c', action='store_true')
+    parser.add_argument('--find', '-f', type=str)
+    parser.add_argument('--quiet', '-q', action='store_true')
+    parser.add_argument('file', nargs='?')
+    return parser.parse_args()
+
+
+def process_args(args):
+    if args.file:
+        infile = open(args.file, 'rb')
+    else:
+        infile = sys.stdin
+
+    if args.colorize:
+        func = colorize
+    elif args.find:
+        func = find
+    else:
+        func = dump
+
+    return infile, func
+
+
+def main():
+    args = parse_args()
+    infile, func = process_args(args)
+    func(infile, args)
+
+
 if __name__ == '__main__':
-    try:
-        if len(sys.argv) == 1:
-            colorize()
-        elif sys.argv[1] == '-d':
-            if len(sys.argv) > 2:
-                sys.stdin = open(sys.argv[2], 'rb')
-            dump()
-        elif sys.argv[1] == '-f':
-            pattern = sys.argv[2].lower()
-            data = open(sys.argv[3], 'rb').read().encode('hex')
-            if data.find(pattern) >= 0:
-                print sys.argv[3]
-        else:
-            sys.stderr.write("Usage: {} [-d]\n".format(sys.argv[0]))
-    except IOError as e:
-        if e.errno == errno.EPIPE:
-            pass
-        else:
-            raise
+    main()
