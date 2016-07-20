@@ -59,9 +59,15 @@ def dump(infile, args):
     sys.stdout.write('\n')
 
 
+def reverse(infile, args):
+    for l in infile:
+        sys.stdout.write(l.strip().decode('hex'))
+
+
 def parse_args():
     parser = argparse.ArgumentParser(prog='hex')
     parser.add_argument('--dump', '-d', action='store_true')
+    parser.add_argument('--reverse', '-r', action='store_true')
     parser.add_argument('--colorize', '-c', action='store_true')
     parser.add_argument('--find', '-f', type=str)
     parser.add_argument('--quiet', '-q', action='store_true')
@@ -79,6 +85,8 @@ def process_args(args):
         func = colorize
     elif args.find:
         func = find
+    elif args.reverse:
+        func = reverse
     else:
         func = dump
 
