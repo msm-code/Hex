@@ -28,8 +28,22 @@ def colorhex(str):
     sys.stdout.write('\033[0m')
 
 
+def colordword(dwordstr):
+    v = int(dwordstr, 16)
+    #r, g, b, x = [int(c, 16) for c in chunks(dwordstr, 2)]
+    #r, g, b = r ^ x, g ^ x, b ^ x
+
+    sys.stdout.write('\033[38;5;{}m'.format(v % 231 + 1))
+    sys.stdout.write(dwordstr)
+    sys.stdout.write('\033[0m')
+
+
 def hex_chunks(line):
     return re.finditer('([0-9A-F]{2}){4,}|([0-9a-f]{2}){4,}', line)
+
+
+def dword_hex_chunks(line):
+    return re.finditer('([0-9A-F]{2}){4}|([0-9a-f]{2}){4}', line)
 
 
 def colorize(infile, args):
@@ -43,6 +57,16 @@ def colorize(infile, args):
         sys.stdout.write(l[i:])
 
 
+def colorize_dword(infile, args):
+    for l in infile:
+        i = 0
+        for m in dword_hex_chunks(l):
+            frm, to = m.span()
+            sys.stdout.write(l[i:frm])
+            colordword(l[frm:to])
+            i = to
+        sys.stdout.write(l[i:])
+
 def find(infile, args):
     sought = args.find.decode('hex')
     ndx = infile.read().find(sought)
@@ -50,7 +74,7 @@ def find(infile, args):
         if args.quiet:
             print args.file
         else:
-            print '{ndx:<5} {ndx:<5x} {}'.format(args.file, ndx=ndx)
+            print '{ndx:<7x} {}'.format(args.file, ndx=ndx)
 
 
 def dump(infile, args):
@@ -69,6 +93,7 @@ def parse_args():
     parser.add_argument('--dump', '-d', action='store_true')
     parser.add_argument('--reverse', '-r', action='store_true')
     parser.add_argument('--colorize', '-c', action='store_true')
+    parser.add_argument('--colorize-dword', action='store_true')
     parser.add_argument('--find', '-f', type=str)
     parser.add_argument('--quiet', '-q', action='store_true')
     parser.add_argument('file', nargs='?')
@@ -87,6 +112,8 @@ def process_args(args):
         func = find
     elif args.reverse:
         func = reverse
+    elif args.colorize_dword:
+        func = colorize_dword
     else:
         func = dump
 
