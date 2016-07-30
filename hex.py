@@ -39,7 +39,7 @@ def colordword(dwordstr):
 
 
 def hex_chunks(line):
-    return re.finditer('([0-9A-F]{2}){4,}|([0-9a-f]{2}){4,}', line)
+    return re.finditer('([0-9A-F]{2})+|([0-9a-f]{2})+', line)
 
 
 def dword_hex_chunks(line):
