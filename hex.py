@@ -83,6 +83,13 @@ def dump(infile, args):
     sys.stdout.write('\n')
 
 
+def sanitize(infile, args):
+    for l in infile:
+        sane = ''.join(c if 0x20 <= ord(c) < 0x7f or c == '\n' else '.' for c in l)
+        sys.stdout.write(sane)
+    sys.stdout.write('\n')
+
+
 def reverse(infile, args):
     for l in infile:
         sys.stdout.write(l.strip().decode('hex'))
@@ -95,6 +102,7 @@ def parse_args():
     parser.add_argument('--colorize', '-c', action='store_true')
     parser.add_argument('--colorize-dword', action='store_true')
     parser.add_argument('--find', '-f', type=str)
+    parser.add_argument('--sanitize', '-s', action='store_true')
     parser.add_argument('--quiet', '-q', action='store_true')
     parser.add_argument('file', nargs='?')
     return parser.parse_args()
@@ -112,6 +120,8 @@ def process_args(args):
         func = find
     elif args.reverse:
         func = reverse
+    elif args.sanitize:
+        func = sanitize
     elif args.colorize_dword:
         func = colorize_dword
     else:
