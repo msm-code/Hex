@@ -67,10 +67,24 @@ def colorize_dword(infile, args):
             i = to
         sys.stdout.write(l[i:])
 
+
 def find(infile, args):
     sought = args.find.decode('hex')
     ndx = infile.read().find(sought)
     if ndx >= 0:
+        if args.quiet:
+            print args.file
+        else:
+            print '{ndx:<7x} {}'.format(args.file, ndx=ndx)
+
+
+def find_all(infile, args):
+    sought = args.find_all.decode('hex')
+    ndx = -1
+    while True:
+        ndx = infile.read().find(sought, ndx+1)
+        if ndx < 0:
+            break
         if args.quiet:
             print args.file
         else:
@@ -102,6 +116,7 @@ def parse_args():
     parser.add_argument('--colorize', '-c', action='store_true')
     parser.add_argument('--colorize-dword', action='store_true')
     parser.add_argument('--find', '-f', type=str)
+    parser.add_argument('--find-all', '-F', type=str)
     parser.add_argument('--sanitize', '-s', action='store_true')
     parser.add_argument('--quiet', '-q', action='store_true')
     parser.add_argument('file', nargs='?')
@@ -118,6 +133,8 @@ def process_args(args):
         func = colorize
     elif args.find:
         func = find
+    elif args.find_all:
+        func = find_all
     elif args.reverse:
         func = reverse
     elif args.sanitize:
