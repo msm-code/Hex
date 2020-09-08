@@ -30,11 +30,8 @@ optional arguments:
 When `[file]` is not supplied, use stdin instead
 
 ```
-/home/msm/Projects/Hex$ head -c 69 /dev/urandom | hex -d
-b8be39df195409ab3d3a430cc1d31d1034d0efde96569bcb73404d777ff7e1dc44d07037197845b2e0d7bbbbb6567384dfb789a5802302a3701cc30b87d5ff7b20b01e7282
-
-/home/msm/Projects/Hex$ head -c 60 /dev/urandom | hex
-6effcd4c19492122ebcb337712bae09f11ff48301858c6872963849ebaeee4944493de07f710bc3170bc911e8a2cdb79bedb5e4f8a4d1fa34769a600
+/home/msm/Projects/Hex$ head -c 50 /dev/urandom | hex
+6effcd4c19492122ebcb337712bae09f11ff48301858c6872963849ebaeee4944493de07f710bc3170bc911e8a2cdb79bedb
 
 /home/msm/Projects/Hex$ head -c 60 /dev/urandom | hex -D
 00000000 d6cd31278198ae321d12af80aaa4e198 ..1'...2........
